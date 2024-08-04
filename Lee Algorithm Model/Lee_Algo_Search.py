@@ -1,7 +1,7 @@
 from collections import deque
 
 # Read the map from the file
-with open('round_3.txt', 'r') as file:
+with open('Lee Algorithm Model/round_3.txt', 'r') as file:
     map_data = [list(line.strip()) for line in file]
 
 # Define the visibility range
@@ -122,6 +122,6 @@ while targets:
     targets.remove((target_row, target_col))
 
 # Save the final map with the optimal paths to a text file
-with open('result_Round3.txt', 'w') as file:
+with open('Lee Algorithm Model/result_Round3.txt', 'w') as file:
     for row in map_data:
         file.write(' '.join(row) + '\n')

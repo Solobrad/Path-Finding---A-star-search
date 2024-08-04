@@ -1,7 +1,7 @@
 import heapq
 
 # Read the data file
-with open('data_1 (1).txt', 'r') as file:
+with open('A Star Model/data_1.txt', 'r') as file:
     grid_data = [list(line.strip()) for line in file]
 
 # Define the movements (up, down, left, right, diagonal)
@@ -107,5 +107,10 @@ if optimal_path:
             grid_data[row][col] = 'P'
 
 # Print the final grid data
+# Save the final grid data to a file
+with open('A Star Model/Result_data_1.txt', 'w') as file:
+    for row in grid_data:
+        file.write(' '.join(row) + '\n')
+
 for row in grid_data:
     print(' '.join(row))
