@@ -1,4 +1,5 @@
 from collections import deque
+import time
 
 # Read the map from the file
 with open('Lee Algorithm Model/round_3.txt', 'r') as file:
@@ -48,8 +49,6 @@ def is_passable_cell(row, col, visibility):
                 return False
             if map_data[new_row][new_col] == 'W':
                 return False
-            new_row += dx[i]
-            new_col += dy[i]
     return True
 
 
@@ -60,11 +59,13 @@ def perform_lee_algorithm(start_row, start_col):
     distances = [[float('inf')] * len(map_data[row])
                  for row in range(len(map_data))]
     parent = {}
+    num_steps = 0
 
     distances[start_row][start_col] = 0
 
     while queue:
         current_row, current_col = queue.popleft()
+        num_steps += 1
 
         # Explore the neighboring cells
         for i in range(8):
@@ -80,7 +81,9 @@ def perform_lee_algorithm(start_row, start_col):
                         parent[(new_row, new_col)] = (current_row, current_col)
 
                         if is_target_cell(new_row, new_col):
-                            return new_row, new_col, distances, parent
+                            return new_row, new_col, distances, parent, num_steps
+
+    return None, None, distances, parent, num_steps
 
 
 # Trace back the optimal path from the start to the target
@@ -97,10 +100,13 @@ def trace_path(start_row, start_col, target_row, target_col, parent):
     return path
 
 
+start_time = time.time()
+total_steps = 0
+
 # Perform the algorithm to find and trace paths to all targets
 # Perform the algorithm to find and trace paths to all targets
 while targets:
-    target_row, target_col, distances, parent = perform_lee_algorithm(
+    target_row, target_col, distances, parent, num_steps = perform_lee_algorithm(
         start_row, start_col)
     if target_row is None or target_col is None:
         break
@@ -120,8 +126,15 @@ while targets:
     # Update the starting point and remove the reached target from the list
     start_row, start_col = target_row, target_col
     targets.remove((target_row, target_col))
+    total_steps += num_steps
+
+end_time = time.time()
+time_taken = end_time - start_time
 
 # Save the final map with the optimal paths to a text file
-with open('Lee Algorithm Model/result_Round3.txt', 'w') as file:
+with open('Lee Algorithm Model/result_Round3.1.txt', 'w') as file:
     for row in map_data:
         file.write(' '.join(row) + '\n')
+    file.write('\n' + '-' * 40 + '\n')
+    file.write(f'Time Taken: {time_taken:.2f} seconds\n')
+    file.write(f'Steps Taken: {total_steps}\n')
