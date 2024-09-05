@@ -1,4 +1,5 @@
 import heapq
+import time
 
 # Read the data file
 with open('A Star Model/data_1.txt', 'r') as file:
@@ -34,68 +35,58 @@ def heuristic(current_pos, target_pos):
 def find_path(start_pos, target_pos, grid_data):
     # Initialize the open and closed sets
     open_set = []
+    heapq.heappush(open_set, (0, start_pos, []))
     closed_set = set()
+    costs = {start_pos: 0}
 
-    # Initialize the starting node with a cost of 0
-    start_node = (0, start_pos, [])
-    heapq.heappush(open_set, start_node)
+    # Maintain a dictionary to store the parent of each node
+    parent_map = {start_pos: None}
 
     while open_set:
-        # Pop the node with the lowest cost from the open set
         current_cost, current_pos, current_path = heapq.heappop(open_set)
 
-        # Check if the current position is the target
         if current_pos == target_pos:
-            return current_path
+            # Reconstruct path from target to start
+            path = []
+            while current_pos:
+                path.append(current_pos)
+                current_pos = parent_map.get(current_pos)
+            return path[::-1]  # Reverse the path
 
-        # Add the current position to the closed set
         closed_set.add(current_pos)
 
-        # Explore the neighboring cells
         for movement in movements:
             new_row = current_pos[0] + movement[0]
             new_col = current_pos[1] + movement[1]
             new_pos = (new_row, new_col)
 
-            # Check if the new position is within the grid boundaries
-            if new_row >= 0 and new_row < num_rows and new_col >= 0 and new_col < num_cols:
-                # Check if the new position is passable (not an obstacle)
+            if 0 <= new_row < num_rows and 0 <= new_col < num_cols:
                 if grid_data[new_row][new_col] != 'W':
-                    # Calculate the cost to reach the new position
                     new_cost = current_cost + 1
-
-                    # Calculate the heuristic value for the new position
                     new_heuristic = heuristic(new_pos, target_pos)
-
-                    # Calculate the total estimated cost for the new position
                     new_total_cost = new_cost + new_heuristic
 
-                    # Check if the new position is already in the closed set
-                    if new_pos in closed_set:
-                        continue
-
-                    # Check if the new position is already in the open set
-                    is_in_open_set = False
-                    for i, (cost, pos, path) in enumerate(open_set):
-                        if pos == new_pos:
-                            is_in_open_set = True
-                            if new_cost < cost:
-                                # Update the cost and path for the new position
-                                open_set[i] = (new_cost, new_pos,
-                                               current_path + [new_pos])
-                                heapq.heapify(open_set)
-                            break
-                    if not is_in_open_set:
-                        # Add the new position to the open set
+                    if new_pos not in closed_set and (new_pos not in costs or new_cost < costs[new_pos]):
+                        costs[new_pos] = new_cost
+                        parent_map[new_pos] = current_pos
                         heapq.heappush(
-                            open_set, (new_total_cost, new_pos, current_path + [new_pos]))
+                            open_set, (new_total_cost, new_pos, current_path + [current_pos]))
 
     # No path found
     return None
 
 
+start_time = time.time()
+
 # Find the optimal path
 optimal_path = find_path(start_pos, target_pos, grid_data)
+
+# Record the end time and calculate time taken
+end_time = time.time()
+time_taken = end_time - start_time
+
+# Count the number of steps in the path
+num_steps = len(optimal_path) if optimal_path else 0
 
 # Mark the path cells and targets in the grid data
 if optimal_path:
@@ -108,9 +99,14 @@ if optimal_path:
 
 # Print the final grid data
 # Save the final grid data to a file
-with open('A Star Model/Result_data_1.txt', 'w') as file:
+with open('A Star Model/Result_data_3.txt', 'w') as file:
     for row in grid_data:
         file.write(' '.join(row) + '\n')
+
+    # Add separation lines and append time and steps information
+    file.write('\n' + '-' * 40 + '\n')
+    file.write(f'Time Taken: {time_taken:.2f} seconds\n')
+    file.write(f'Steps Taken: {num_steps}\n')
 
 for row in grid_data:
     print(' '.join(row))
